@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue-Green Deployment Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <header>
+            <div>
+                <p class="eyebrow">CI/CD &middot; ZERO-DOWNTIME RELEASES</p>
+                <h1>Blue-Green Deploy</h1>
+                <p class="subtitle">Two environments, one switch. Traffic moves only after the standby build proves itself healthy.</p>
+            </div>
+
+            <div class="status" id="status-pill">
+                <span class="status-dot"></span>
+                <span id="status-text">ALL SYSTEMS NOMINAL</span>
+            </div>
+        </header>
+
+        <main>
+
+            <!-- Signature element: the switch -->
+            <section class="switch-panel" id="switch-panel">
+
+                <div class="switch-panel-head">
+                    <div>
+                        <p class="label">TRAFFIC ROUTER</p>
+                        <h2>Live Cutover</h2>
+                    </div>
+                    <button class="cutover-btn" id="cutover-btn" type="button">
+                        Trigger Cutover
+                        <span class="cutover-btn-icon">&rarr;</span>
+                    </button>
+                </div>
+
+                <div class="track" id="track">
+
+                    <div class="station" id="station-blue" data-env="BLUE">
+                        <div class="station-head">
+                            <span class="station-dot"></span>
+                            <span class="station-name">BLUE</span>
+                        </div>
+                        <p class="station-version" id="version-blue">v1.0.0</p>
+                        <p class="station-state" id="state-blue">LIVE &middot; 100% TRAFFIC</p>
+                    </div>
+
+                    <div class="rail" id="rail">
+                        <div class="rail-line"></div>
+                        <div class="lb-node">
+                            <span>LOAD BALANCER</span>
+                        </div>
+                        <div class="packets" id="packets-left" aria-hidden="true">
+                            <span class="packet"></span>
+                            <span class="packet"></span>
+                            <span class="packet"></span>
+                        </div>
+                        <div class="packets" id="packets-right" aria-hidden="true">
+                            <span class="packet"></span>
+                            <span class="packet"></span>
+                            <span class="packet"></span>
+                        </div>
+                    </div>
+
+                    <div class="station standby" id="station-green" data-env="GREEN">
+                        <div class="station-head">
+                            <span class="station-dot"></span>
+                            <span class="station-name">GREEN</span>
+                        </div>
+                        <p class="station-version" id="version-green">v0.9.4</p>
+                        <p class="station-state" id="state-green">STANDBY &middot; WARM</p>
+                    </div>
+
+                </div>
+
+                <p class="switch-log" id="switch-log">Standing by. Green is provisioned, health-checked, and idle — ready to take traffic on cutover.</p>
+
+            </section>
+
+            <section class="metrics">
+                <div class="metric-card">
+                    <span>Active Environment</span>
+                    <strong id="environment-small">BLUE</strong>
+                </div>
+                <div class="metric-card">
+                    <span>Serving Version</span>
+                    <strong id="version">v1.0.0</strong>
+                </div>
+                <div class="metric-card">
+                    <span>Health</span>
+                    <strong class="healthy" id="health-value">Healthy</strong>
+                </div>
+                <div class="metric-card">
+                    <span>Rollback Window</span>
+                    <strong id="rollback-value">Instant</strong>
+                </div>
+            </section>
+
+            <section class="pipeline-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="label">CI/CD PIPELINE</p>
+                        <h3>Release Path</h3>
+                    </div>
+                    <span class="pipeline-status" id="pipeline-status">SUCCESS</span>
+                </div>
+
+                <div class="pipeline" id="pipeline">
+                    <div class="pipeline-step complete" data-step="1">
+                        <div class="step-icon"><span class="step-num">01</span><span class="step-check">&#10003;</span></div>
+                        <span>Code</span>
+                    </div>
+                    <div class="pipeline-line"></div>
+                    <div class="pipeline-step complete" data-step="2">
+                        <div class="step-icon"><span class="step-num">02</span><span class="step-check">&#10003;</span></div>
+                        <span>Build</span>
+                    </div>
+                    <div class="pipeline-line"></div>
+                    <div class="pipeline-step complete" data-step="3">
+                        <div class="step-icon"><span class="step-num">03</span><span class="step-check">&#10003;</span></div>
+                        <span>Test</span>
+                    </div>
+                    <div class="pipeline-line"></div>
+                    <div class="pipeline-step complete" data-step="4">
+                        <div class="step-icon"><span class="step-num">04</span><span class="step-check">&#10003;</span></div>
+                        <span>Deploy to Standby</span>
+                    </div>
+                    <div class="pipeline-line"></div>
+                    <div class="pipeline-step complete" data-step="5">
+                        <div class="step-icon"><span class="step-num">05</span><span class="step-check">&#10003;</span></div>
+                        <span>Health Check</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="info-grid">
+                <div class="info-card">
+                    <p class="label">WHY BLUE-GREEN</p>
+                    <h3>The standby always runs the next release</h3>
+                    <p>
+                        New code ships to whichever environment isn't taking traffic.
+                        It gets its own health checks and smoke tests before the router
+                        ever points a single request at it — production stays untouched
+                        until the new version has proven itself.
+                    </p>
+                </div>
+                <div class="info-card">
+                    <p class="label">ROLLBACK</p>
+                    <h3>Reverting is a router change, not a redeploy</h3>
+                    <p>
+                        If health checks fail after cutover, traffic flips back to the
+                        previous environment immediately. No redeploy, no rebuild —
+                        just a switch back to the version that was already working.
+                    </p>
+                </div>
+            </section>
+
+        </main>
+
+        <footer>
+            <span>Jenkins &middot; Blue-Green CI/CD</span>
+            <span id="timestamp"></span>
+        </footer>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
