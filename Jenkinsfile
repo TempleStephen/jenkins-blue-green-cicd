@@ -1,77 +1,115 @@
+```groovy
 pipeline {
     agent any
 
-    triggers {
-        githubPush()   // fires when GitHub sends a push webhook to this Jenkins job
-    }
-
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')      // Jenkins credential ID
-        IMAGE_NAME             = 'templestephen/bluegreen-dashboard'
-        IMAGE_TAG               = "${env.BUILD_NUMBER}"
-        EC2_HOST                = credentials('ec2-host')            // e.g. ec2-user@x.x.x.x, stored as Jenkins secret text
-        EC2_SSH_KEY              = 'ec2-ssh-key'                      // Jenkins SSH credential ID
+        PROJECT_DIR = 'C:\\jenkins-blue-green-cicd'
+        BLUE_URL    = 'http://localhost:5001'
+        GREEN_URL   = 'http://localhost:5002'
+        LIVE_URL    = 'http://localhost:5000'
     }
 
     stages {
 
-        stage('Checkout') {
+        stage('Verify Environment') {
             steps {
-                checkout scm
+                echo 'Checking Docker and project environment...'
+
+                bat 'docker --version'
+                bat 'docker compose version'
+                bat 'cd /d "%PROJECT_DIR%" && docker compose config'
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Images') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
-            }
-        }
+                echo 'Building Blue and Green Docker images...'
 
-        stage('Test') {
-            steps {
-                // Spin the image up in isolation and hit the health endpoint
-                // before it ever gets near the deploy stage.
-                sh '''
-                    docker run -d --name test-container -p 8099:80 $IMAGE_NAME:$IMAGE_TAG
-                    sleep 3
-                    curl -f http://localhost:8099/health
-                    docker rm -f test-container
+                bat '''
+                    cd /d "%PROJECT_DIR%"
+                    docker compose build
                 '''
             }
         }
 
-        stage('Push Image') {
+        stage('Start Blue-Green Environment') {
             steps {
-                sh '''
-                    echo "$DOCKERHUB_CREDENTIALS_PSW" | docker login -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin
-                    docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
-                    docker push $IMAGE_NAME:$IMAGE_TAG
-                    docker push $IMAGE_NAME:latest
+                echo 'Starting Blue, Green and Nginx...'
+
+                bat '''
+                    cd /d "%PROJECT_DIR%"
+                    docker compose up -d
                 '''
             }
         }
 
-        stage('Deploy to Standby (Blue-Green)') {
+        stage('Verify Containers') {
             steps {
-                sshagent(credentials: [EC2_SSH_KEY]) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no $EC2_HOST \
-                          "IMAGE=$IMAGE_NAME:$IMAGE_TAG bash -s" < deploy/deploy.sh
-                    '''
-                }
+                bat '''
+                    cd /d "%PROJECT_DIR%"
+                    docker compose ps
+                '''
+            }
+        }
+
+        stage('Health Check GREEN') {
+            steps {
+                powershell '''
+                    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+
+                    & "$env:PROJECT_DIR\\scripts\\health-check.ps1"
+                '''
+            }
+        }
+
+        stage('Deploy GREEN') {
+            steps {
+                powershell '''
+                    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+
+                    & "$env:PROJECT_DIR\\scripts\\deploy-green.ps1"
+                '''
+            }
+        }
+
+        stage('Verify Live Traffic') {
+            steps {
+                powershell '''
+                    $response = Invoke-WebRequest -UseBasicParsing "$env:LIVE_URL"
+
+                    if ($response.StatusCode -ne 200) {
+                        throw "Live traffic verification failed."
+                    }
+
+                    Write-Host "Live traffic verification PASSED."
+                    Write-Host "HTTP Status: $($response.StatusCode)"
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "Deployed $IMAGE_NAME:$IMAGE_TAG — cutover handled by deploy/deploy.sh on the EC2 host."
+            echo '=========================================='
+            echo 'BLUE-GREEN DEPLOYMENT SUCCESSFUL'
+            echo 'GREEN is now serving live traffic.'
+            echo '=========================================='
         }
+
         failure {
-            echo "Pipeline failed — standby environment was not touched, live traffic is unaffected."
-        }
-        always {
-            sh 'docker logout || true'
+            echo '=========================================='
+            echo 'PIPELINE FAILED'
+            echo 'Attempting rollback to BLUE...'
+            echo '=========================================='
+
+            powershell '''
+                Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+
+                if (Test-Path "$env:PROJECT_DIR\\scripts\\rollback.ps1") {
+                    & "$env:PROJECT_DIR\\scripts\\rollback.ps1"
+                }
+            '''
         }
     }
 }
+```
