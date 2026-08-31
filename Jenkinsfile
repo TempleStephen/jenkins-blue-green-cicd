@@ -1,115 +1,90 @@
-```groovy
 pipeline {
     agent any
 
     environment {
-        PROJECT_DIR = 'C:\\jenkins-blue-green-cicd'
-        BLUE_URL    = 'http://localhost:5001'
-        GREEN_URL   = 'http://localhost:5002'
-        LIVE_URL    = 'http://localhost:5000'
+        PROJECT_DIR = "/var/jenkins_home/workspace/jenkins-blue-green-cicd"
+        BLUE_PORT = "5001"
+        GREEN_PORT = "5002"
+        LIVE_PORT = "5000"
     }
 
     stages {
 
-        stage('Verify Environment') {
+        stage('Checkout Source') {
             steps {
-                echo 'Checking Docker and project environment...'
+                echo "Cloning GitHub repository..."
+                checkout scm
+            }
+        }
 
-                bat 'docker --version'
-                bat 'docker compose version'
-                bat 'cd /d "%PROJECT_DIR%" && docker compose config'
+        stage('Verify Docker') {
+            steps {
+                sh 'docker --version'
+                sh 'docker compose version'
             }
         }
 
         stage('Build Docker Images') {
             steps {
-                echo 'Building Blue and Green Docker images...'
-
-                bat '''
-                    cd /d "%PROJECT_DIR%"
-                    docker compose build
-                '''
+                sh 'docker compose build --no-cache'
             }
         }
 
-        stage('Start Blue-Green Environment') {
+        stage('Start Blue Environment') {
             steps {
-                echo 'Starting Blue, Green and Nginx...'
-
-                bat '''
-                    cd /d "%PROJECT_DIR%"
-                    docker compose up -d
-                '''
+                sh 'docker compose up -d blue'
             }
         }
 
-        stage('Verify Containers') {
+        stage('Deploy Green Environment') {
             steps {
-                bat '''
-                    cd /d "%PROJECT_DIR%"
-                    docker compose ps
-                '''
+                sh 'docker compose up -d green'
             }
         }
 
-        stage('Health Check GREEN') {
+        stage('Health Check Green') {
             steps {
-                powershell '''
-                    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-
-                    & "$env:PROJECT_DIR\\scripts\\health-check.ps1"
-                '''
+                sh 'curl -f http://green-app || exit 1'
             }
         }
 
-        stage('Deploy GREEN') {
+        stage('Switch Traffic to Green') {
             steps {
-                powershell '''
-                    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+                sh '''
+                docker exec blue-green-nginx sh -c \
+                "sed -i 's/server blue-app:80;/server green-app:80;/' /etc/nginx/conf.d/default.conf"
 
-                    & "$env:PROJECT_DIR\\scripts\\deploy-green.ps1"
+                docker exec blue-green-nginx nginx -s reload
                 '''
             }
         }
 
-        stage('Verify Live Traffic') {
+        stage('Verify Live Environment') {
             steps {
-                powershell '''
-                    $response = Invoke-WebRequest -UseBasicParsing "$env:LIVE_URL"
-
-                    if ($response.StatusCode -ne 200) {
-                        throw "Live traffic verification failed."
-                    }
-
-                    Write-Host "Live traffic verification PASSED."
-                    Write-Host "HTTP Status: $($response.StatusCode)"
-                '''
+                sh 'curl -f http://blue-green-nginx || exit 1'
             }
         }
+
     }
 
     post {
+
         success {
-            echo '=========================================='
-            echo 'BLUE-GREEN DEPLOYMENT SUCCESSFUL'
-            echo 'GREEN is now serving live traffic.'
-            echo '=========================================='
+            echo 'Deployment Successful. GREEN is LIVE.'
         }
 
         failure {
-            echo '=========================================='
-            echo 'PIPELINE FAILED'
-            echo 'Attempting rollback to BLUE...'
-            echo '=========================================='
+            echo 'Deployment Failed.'
+            sh '''
+            docker exec blue-green-nginx sh -c \
+            "sed -i 's/server green-app:80;/server blue-app:80;/' /etc/nginx/conf.d/default.conf"
 
-            powershell '''
-                Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-
-                if (Test-Path "$env:PROJECT_DIR\\scripts\\rollback.ps1") {
-                    & "$env:PROJECT_DIR\\scripts\\rollback.ps1"
-                }
+            docker exec blue-green-nginx nginx -s reload
             '''
+        }
+
+        always {
+            echo 'Pipeline Finished.'
         }
     }
 }
-```
