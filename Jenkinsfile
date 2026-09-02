@@ -1,29 +1,43 @@
-stage('Switch Traffic') {
-    steps {
-        script {
+```groovy
+pipeline {
+    agent any
 
-            echo "========== SWITCH TRAFFIC =========="
+    environment {
+        NGINX_CONTAINER = "nginx"
+        TARGET_ENV = "GREEN"
+    }
 
-            def targetBackend = (env.TARGET_ENV == "GREEN") ? "green_backend" : "blue_backend"
+    stages {
 
-            sh """
-                docker exec ${NGINX_CONTAINER} sh -c "
-                    sed 's|proxy_pass http://blue_backend;|proxy_pass http://${targetBackend};|g;
-                         s|proxy_pass http://green_backend;|proxy_pass http://${targetBackend};|g' \
-                    /etc/nginx/conf.d/default.conf > /tmp/default.conf
+        stage('Switch Traffic') {
+            steps {
+                script {
 
-                    cp /tmp/default.conf /etc/nginx/conf.d/default.conf
+                    echo "========== SWITCH TRAFFIC =========="
 
-                    nginx -t
-                    nginx -s reload
-                "
-            """
+                    def targetBackend = (env.TARGET_ENV == "GREEN") ? "green_backend" : "blue_backend"
 
-            echo "Traffic switched successfully to ${env.TARGET_ENV}."
+                    sh """
+                        docker exec ${NGINX_CONTAINER} sh -c '
+                            sed "s|proxy_pass http://blue_backend;|proxy_pass http://${targetBackend};|g;
+                                 s|proxy_pass http://green_backend;|proxy_pass http://${targetBackend};|g" \
+                            /etc/nginx/conf.d/default.conf > /tmp/default.conf
 
-            sh """
-                docker exec ${NGINX_CONTAINER} grep "proxy_pass" /etc/nginx/conf.d/default.conf
-            """
+                            cp /tmp/default.conf /etc/nginx/conf.d/default.conf
+
+                            nginx -t
+                            nginx -s reload
+                        '
+                    """
+
+                    echo "Traffic switched successfully to ${env.TARGET_ENV}."
+
+                    sh """
+                        docker exec ${NGINX_CONTAINER} grep "proxy_pass" /etc/nginx/conf.d/default.conf
+                    """
+                }
+            }
         }
     }
 }
+```
