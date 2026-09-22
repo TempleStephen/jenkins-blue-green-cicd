@@ -20,7 +20,8 @@ pipeline {
 
                         echo "Switching traffic to ${targetBackend}"
 
-                        sed -i 's|proxy_pass http://blue_backend;|proxy_pass http://${targetBackend};|g' ${NGINX_CONFIG}
+                        sed 's|proxy_pass http://blue_backend;|proxy_pass http://${targetBackend};|g' ${NGINX_CONFIG} > /tmp/default.conf
+cat /tmp/default.conf > ${NGINX_CONFIG}
 
                         echo "Testing Nginx configuration..."
                         docker exec ${NGINX_CONTAINER} nginx -t
