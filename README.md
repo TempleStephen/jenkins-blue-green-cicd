@@ -6,10 +6,10 @@
 
 *A production-style Blue-Green Deployment pipeline built with Jenkins, Docker Compose, Nginx, and GitHub.*
 
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge\&logo=docker\&logoColor=white)
-![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge\&logo=jenkins\&logoColor=white)
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge\&logo=nginx\&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge\&logo=github\&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
 ![CI/CD](https://img.shields.io/badge/CI/CD-Automation-orange?style=for-the-badge)
 
 </div>
@@ -18,27 +18,52 @@
 
 ## 📌 Project Overview
 
-This project demonstrates a **Blue-Green Deployment strategy** using **Jenkins**, **Docker Compose**, and **Nginx** to achieve **zero-downtime application releases**.
+This project demonstrates a **production-style Blue-Green Deployment strategy** using **Jenkins**, **Docker Compose**, and **Nginx** to achieve **zero-downtime application releases**.
 
-Instead of deploying directly to production, Jenkins deploys a new application version to a **standby (Green)** environment, validates it with health checks, and only then switches production traffic from **Blue** to **Green**.
+Instead of deploying directly to production, Jenkins deploys a new application version to a **standby (Green)** environment, validates it through automated health checks, and only then switches live production traffic from **Blue** to **Green**.
 
-If anything goes wrong, traffic can be switched back instantly without rebuilding or restarting the application.
+If a deployment fails or an issue is detected, traffic can be switched back instantly without rebuilding or restarting the application, providing a fast and reliable rollback mechanism.
+
+This project simulates a real-world CI/CD deployment workflow commonly used in modern DevOps environments.
 
 ---
 
-## 🏗️ Architecture Diagram
+## 📑 Table of Contents
 
-This architecture demonstrates a complete Blue-Green deployment workflow using Jenkins, Docker, Nginx, and two isolated application environments.
+- [Architecture Diagram](#-architecture-diagram)
+- [Project Architecture](#-project-architecture)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Docker Compose Services](#️-docker-compose-services)
+- [Blue-Green Deployment Workflow](#-blue-green-deployment-workflow)
+- [Jenkins Pipeline](#-jenkins-pipeline)
+- [Nginx Reverse Proxy Configuration](#-nginx-reverse-proxy-configuration)
+- [Health Check](#-health-check)
+- [Dynamic Frontend Detection](#-dynamic-frontend-detection)
+- [Getting Started](#-getting-started)
+- [Testing](#-testing)
+- [Screenshots](#-screenshots)
+- [Deployment Flow](#-deployment-flow)
+- [DevOps Skills Demonstrated](#-devops-skills-demonstrated)
+- [Future Improvements](#-future-improvements)
+- [About This Project](#-about-this-project)
+
+---
+
+# 🏗️ Architecture Diagram
+
+This architecture illustrates the complete Blue-Green CI/CD workflow using **GitHub**, **Jenkins**, **Docker**, and **Nginx**. Jenkins deploys a new version to the standby environment, validates it through health checks, and performs a zero-downtime traffic switch using Nginx.
 
 <p align="center">
-  <img src="./screenshots/architecture-diagram.png"
-       alt="Architecture Diagram.png"
-       width="100%">
+  <img src="screenshots/architecture-diagram.png" alt="Blue-Green CI/CD Architecture" width="100%">
 </p>
+
+> **Want to see the deployment in action?** Scroll down to the **📸 Screenshots** section for Jenkins pipeline execution, traffic switching, rollback verification, and Docker container screenshots.
 
 ---
 
-## 🎯 Project Architecture
+# 🎯 Project Architecture
 
 ```text
                      GitHub Repository
@@ -68,75 +93,35 @@ This architecture demonstrates a complete Blue-Green deployment workflow using J
 
 # ✨ Features
 
-* ✅ Blue-Green Deployment strategy.
-* ✅ Zero-downtime traffic switching.
-* ✅ Jenkins Declarative Pipeline.
-* ✅ Docker Compose orchestration.
-* ✅ Nginx reverse proxy load balancing.
-* ✅ Automated health verification.
-* ✅ Dynamic environment version detection.
-* ✅ Instant rollback capability.
-* ✅ GitHub source-controlled deployment pipeline.
+- ✅ Blue-Green Deployment strategy.
+- ✅ Zero-downtime traffic switching.
+- ✅ Jenkins Declarative Pipeline.
+- ✅ Docker Compose orchestration.
+- ✅ Nginx reverse proxy load balancing.
+- ✅ Automated health verification.
+- ✅ Dynamic environment version detection.
+- ✅ Instant rollback capability.
+- ✅ GitHub source-controlled deployment pipeline.
 
 ---
 
 # 🛠️ Tech Stack
 
-| Technology              | Purpose                        |
-| ----------------------- | ------------------------------ |
-| **Jenkins**             | CI/CD automation pipeline      |
-| **Docker**              | Containerization               |
-| **Docker Compose**      | Multi-container orchestration  |
-| **Nginx**               | Reverse proxy & traffic switch |
-| **GitHub**              | Source control                 |
-| **PowerShell**          | Deployment & rollback scripts  |
-| **HTML/CSS/JavaScript** | Demo web application           |
+| Technology | Purpose |
+|------------|---------|
+| **Jenkins** | CI/CD automation pipeline |
+| **Docker** | Containerization |
+| **Docker Compose** | Multi-container orchestration |
+| **Nginx** | Reverse proxy and traffic switching |
+| **GitHub** | Source control |
+| **PowerShell** | Deployment and rollback scripts |
+| **HTML / CSS / JavaScript** | Demo application dashboard |
 
 ---
 
 # 📁 Project Structure
 
----
-
-## 📸 Project Screenshots
-
-### Jenkins Pipeline Success
-
-<p align="center">
-  <img src="./screenshots/jenkins-pipeline-success.png" width="100%" alt="Jenkins Pipeline Success"/>
-</p>
-
-### Blue Environment (Before Cutover)
-
-<p align="center">
-  <img src="./screenshots/blue-environment-ui.png" width="100%" alt="Blue Environment"/>
-</p>
-
-### Green Environment (After Deployment)
-
-<p align="center">
-  <img src="./screenshots/green-environment-ui.png" width="100%" alt="Green Environment"/>
-</p>
-
-### Traffic Successfully Switched to Green
-
-<p align="center">
-  <img src="./screenshots/traffic-switch-green.png" width="100%" alt="Traffic Switched to Green"/>
-</p>
-
-### Instant Rollback to Blue
-
-<p align="center">
-  <img src="./screenshots/rollback-to-blue.png" width="100%" alt="Rollback to Blue"/>
-</p>
-
-### Running Docker Containers
-
-<p align="center">
-  <img src="./screenshots/docker-containers-running.png" width="100%" alt="Docker Containers"/>
-</p>
-
-```bash
+```text
 jenkins-blue-green-cicd/
 │
 ├── app/
@@ -168,20 +153,22 @@ jenkins-blue-green-cicd/
 └── README.md
 ```
 
+> 📸 All deployment screenshots and verification images are available in the **Screenshots** section below.
+
 ---
 
 # ⚙️ Docker Compose Services
 
 The project runs four containers connected through a shared Docker network.
 
-| Service       | Port   | Description                             |
-| ------------- | ------ | --------------------------------------- |
-| **Blue App**  | `5001` | Live production environment (v1.0.0)    |
-| **Green App** | `5002` | Standby deployment environment (v1.1.0) |
-| **Nginx**     | `5000` | Reverse proxy & traffic switch          |
-| **Jenkins**   | `8080` | CI/CD server                            |
+| Service | Port | Description |
+|---------|------|-------------|
+| **Blue App** | `5001` | Live production environment (`v1.0.0`) |
+| **Green App** | `5002` | Standby deployment environment (`v1.1.0`) |
+| **Nginx** | `5000` | Reverse proxy and traffic switch controller |
+| **Jenkins** | `8080` | CI/CD automation server |
 
-Network:
+**Shared Network**
 
 ```yaml
 bluegreen-network
@@ -200,7 +187,7 @@ Developer
 GitHub Repository
 ```
 
-Jenkins detects a push or manual trigger.
+Jenkins detects a GitHub push or a manual trigger.
 
 ---
 
@@ -234,19 +221,19 @@ Green image contains:
 
 ## Step 3 — Deploy Green
 
-Green is deployed while Blue continues serving users.
+Green is deployed while Blue continues serving production traffic.
 
 ```bash
 docker compose up -d green
 ```
 
-Production traffic remains on Blue.
+Blue remains live throughout deployment.
 
 ---
 
 ## Step 4 — Health Check
 
-Jenkins validates Green before switching traffic.
+Jenkins validates the Green environment before switching traffic.
 
 ```bash
 curl http://green-app/health
@@ -258,13 +245,13 @@ Expected response:
 Healthy
 ```
 
-If the health check fails, deployment stops.
+Deployment stops automatically if the health check fails.
 
 ---
 
-## Step 5 — Switch Traffic
+## Step 5 — Switch Production Traffic
 
-Jenkins updates Nginx.
+Jenkins updates the Nginx reverse proxy configuration.
 
 Before deployment:
 
@@ -278,26 +265,26 @@ After deployment:
 proxy_pass http://green_backend;
 ```
 
-Reload Nginx.
+Then Jenkins reloads Nginx.
 
 ```bash
-nginx -t
-nginx -s reload
+docker exec blue-green-nginx nginx -t
+docker exec blue-green-nginx nginx -s reload
 ```
 
-Traffic changes instantly without restarting containers.
+Traffic switches instantly with zero downtime.
 
 ---
 
 ## Step 6 — Verification
 
-Jenkins verifies the active backend.
+Jenkins confirms the active backend.
 
 ```bash
 docker exec blue-green-nginx grep proxy_pass /etc/nginx/conf.d/default.conf
 ```
 
-Expected:
+Expected output:
 
 ```text
 proxy_pass http://green_backend;
@@ -307,19 +294,19 @@ proxy_pass http://green_backend;
 
 ## Step 7 — Rollback
 
-Rollback simply points traffic back to Blue.
+Rollback immediately redirects production traffic back to Blue.
 
 ```nginx
 proxy_pass http://blue_backend;
 ```
 
-Users immediately receive the previous stable version.
+No rebuilds or container restarts are required.
 
 ---
 
 # ⚡ Jenkins Pipeline
 
-The deployment pipeline automates traffic switching.
+The Jenkins Declarative Pipeline automates traffic switching after deployment and health verification.
 
 ```groovy
 pipeline {
@@ -374,9 +361,51 @@ pipeline {
 
 ---
 
+# 🔁 Rollback Strategy
+
+Rollback is implemented as a dedicated Jenkins stage. Instead of redeploying an older application version, Jenkins simply redirects traffic back to the previously healthy environment.
+
+```groovy
+stage('Rollback') {
+    when {
+        expression { return params.ROLLBACK == true }
+    }
+
+    steps {
+        script {
+            sh """
+                ACTIVE_BACKEND=\$(docker exec blue-green-nginx sh -c \
+                "grep proxy_pass /etc/nginx/conf.d/default.conf")
+
+                if echo "\$ACTIVE_BACKEND" | grep green_backend >/dev/null; then
+                    TARGET=blue_backend
+                else
+                    TARGET=green_backend
+                fi
+
+                sed "s|proxy_pass http://.*_backend;|proxy_pass http://\$TARGET;|g" \
+                /workspace/nginx/default.conf > /tmp/default.conf
+
+                cat /tmp/default.conf | docker exec -i blue-green-nginx \
+                tee /etc/nginx/conf.d/default.conf >/dev/null
+
+                docker exec blue-green-nginx nginx -t
+                docker exec blue-green-nginx nginx -s reload
+            """
+
+            echo "Rollback completed successfully."
+        }
+    }
+}
+```
+
+This approach provides **instant recovery** without rebuilding Docker images or restarting containers.
+
+---
+
 # 🌐 Nginx Reverse Proxy Configuration
 
-### Upstream Servers
+### Upstream Backends
 
 ```nginx
 upstream blue_backend {
@@ -388,7 +417,7 @@ upstream green_backend {
 }
 ```
 
-### Load Balancer
+### Traffic Controller
 
 ```nginx
 server {
@@ -417,13 +446,13 @@ server {
 }
 ```
 
-Only the `proxy_pass` line changes during deployment.
+Only the `proxy_pass` directive changes during deployment or rollback.
 
 ---
 
 # 🩺 Health Check
 
-Verify Nginx health.
+Verify the Nginx reverse proxy.
 
 ```bash
 curl http://localhost:5000/health
@@ -435,7 +464,7 @@ Output:
 Nginx is healthy
 ```
 
-Verify Green application.
+Verify the Green application.
 
 ```bash
 curl http://localhost:5002/config.json
@@ -454,7 +483,7 @@ Output:
 
 # 🧠 Dynamic Frontend Detection
 
-Instead of hardcoded values, the dashboard fetches its environment from `config.json`.
+The application dashboard automatically displays whichever environment is currently serving traffic.
 
 ```javascript
 const response = await fetch("/config.json");
@@ -464,13 +493,13 @@ document.getElementById("environment-small").textContent = data.environment;
 document.getElementById("version").textContent = data.version;
 ```
 
-The UI always displays whichever environment Nginx is routing to.
+Because `config.json` is generated during the Docker build, the dashboard updates dynamically after every traffic switch.
 
 ---
 
 # 🚀 Getting Started
 
-## Clone Repository
+## Clone the Repository
 
 ```bash
 git clone https://github.com/TempleStephen/jenkins-blue-green-cicd.git
@@ -480,7 +509,7 @@ cd jenkins-blue-green-cicd
 
 ---
 
-## Build Images
+## Build Docker Images
 
 ```bash
 docker compose build --no-cache blue green
@@ -488,7 +517,7 @@ docker compose build --no-cache blue green
 
 ---
 
-## Start Containers
+## Start All Containers
 
 ```bash
 docker compose up -d
@@ -496,7 +525,7 @@ docker compose up -d
 
 ---
 
-## Verify Containers
+## Verify Running Containers
 
 ```bash
 docker compose ps
@@ -515,13 +544,13 @@ jenkins-server
 
 # 🧪 Testing
 
-### Blue Environment
+## Verify Blue Environment
 
 ```bash
 curl http://localhost:5001/config.json
 ```
 
-Returns
+Expected output:
 
 ```json
 {
@@ -532,13 +561,13 @@ Returns
 
 ---
 
-### Green Environment
+## Verify Green Environment
 
 ```bash
 curl http://localhost:5002/config.json
 ```
 
-Returns
+Expected output:
 
 ```json
 {
@@ -549,7 +578,7 @@ Returns
 
 ---
 
-### Active Production Environment
+## Verify Active Production Environment
 
 ```bash
 curl http://localhost:5000/config.json
@@ -575,76 +604,113 @@ After deployment:
 
 ---
 
+## Verify Active Backend
+
+```bash
+docker exec blue-green-nginx grep proxy_pass /etc/nginx/conf.d/default.conf
+```
+
+Expected output after cutover:
+
+```text
+proxy_pass http://green_backend;
+```
+
+Expected output after rollback:
+
+```text
+proxy_pass http://blue_backend;
+```
+
+---
+
 # 📸 Screenshots
 
-Add these screenshots after completing the project.
+The following screenshots demonstrate the complete CI/CD workflow from deployment to rollback.
 
-| Screenshot                 | Description                    |
-| -------------------------- | ------------------------------ |
-| `architecture-diagram.png` | Blue-Green CI/CD architecture  |
-| `jenkins-success.png`      | Successful Jenkins pipeline    |
-| `docker-compose-ps.png`    | Running Docker containers      |
-| `dashboard-blue.png`       | Dashboard showing Blue active  |
-| `dashboard-green.png`      | Dashboard showing Green active |
-| `rollback.png`             | Rollback demonstration         |
+## 🏗️ Architecture Diagram
 
-Example:
+![Architecture Diagram](screenshots/architecture-diagram.png)
 
-```md
-## Jenkins Pipeline Success
+---
 
-![Pipeline](./screenshots/jenkins-success.png)
-```
+## ✅ Jenkins Pipeline Success
+
+![Jenkins Pipeline Success](screenshots/jenkins-success.png)
+
+---
+
+## 🔵 Blue Environment (Live Production)
+
+![Blue Environment](screenshots/dashboard-blue.png)
+
+---
+
+## 🟢 Green Environment (After Deployment)
+
+![Green Environment](screenshots/dashboard-green.png)
+
+---
+
+## 📦 Running Docker Containers
+
+![Docker Containers](screenshots/docker-compose-ps.png)
+
+---
+
+## 🔁 Rollback Verification
+
+![Rollback Verification](screenshots/rollback.png)
 
 ---
 
 # 📈 Deployment Flow
 
-| Stage              | Action                             |
-| ------------------ | ---------------------------------- |
-| **Checkout**       | Pull latest GitHub repository      |
-| **Build**          | Build Blue & Green Docker images   |
-| **Deploy**         | Deploy Green container             |
-| **Health Check**   | Validate Green application         |
-| **Switch Traffic** | Update Nginx configuration         |
-| **Reload Nginx**   | Apply new routing without downtime |
-| **Verification**   | Confirm active backend             |
-| **Rollback**       | Switch traffic back if required    |
+| Stage | Action |
+|-------|--------|
+| **Checkout** | Pull latest GitHub repository. |
+| **Build** | Build Blue and Green Docker images. |
+| **Deploy** | Deploy the Green environment. |
+| **Health Check** | Validate Green before production traffic. |
+| **Switch Traffic** | Update Nginx routing configuration. |
+| **Reload Nginx** | Apply routing changes without downtime. |
+| **Verification** | Confirm Green is serving production traffic. |
+| **Rollback** | Redirect traffic back to Blue if needed. |
 
 ---
 
 # 🎓 DevOps Skills Demonstrated
 
-* Jenkins Declarative Pipelines
-* Docker Image Versioning
-* Docker Compose Networking
-* Nginx Reverse Proxy Configuration
-* Blue-Green Deployment Strategy
-* Zero-Downtime Releases
-* Automated Health Checks
-* Rollback Automation
-* GitHub CI/CD Workflow
-* Linux Command-Line Automation
+- Jenkins Declarative Pipelines
+- Docker Image Versioning
+- Docker Compose Networking
+- Nginx Reverse Proxy Configuration
+- Blue-Green Deployment Strategy
+- Zero-Downtime Releases
+- Automated Health Checks
+- Rollback Automation
+- GitHub CI/CD Integration
+- Linux Command-Line Automation
 
 ---
 
 # 🔮 Future Improvements
 
-* [ ] Deploy the application on AWS EC2.
-* [ ] Store Docker images in Amazon ECR.
-* [ ] Deploy using Amazon ECS / EKS.
-* [ ] Trigger Jenkins automatically with GitHub Webhooks.
-* [ ] Add Prometheus & Grafana monitoring.
-* [ ] Add Slack deployment notifications.
-* [ ] Implement automatic rollback on failed health checks.
+- [ ] Deploy on AWS EC2.
+- [ ] Push Docker images to Amazon ECR.
+- [ ] Deploy workloads using Amazon ECS or EKS.
+- [ ] Trigger Jenkins automatically using GitHub Webhooks.
+- [ ] Add Prometheus and Grafana monitoring.
+- [ ] Send Slack deployment notifications.
+- [ ] Implement automatic rollback on failed health checks.
 
 ---
 
 # 👨‍💻 About This Project
 
-This project was built as part of my hands-on **Cloud & DevOps Engineering Portfolio** to demonstrate real-world CI/CD practices using Docker, Jenkins, GitHub, and Nginx.
+This project was built as part of my **Cloud & DevOps Engineering Portfolio** to demonstrate production-style CI/CD automation using Jenkins, Docker, GitHub, and Nginx.
 
-It focuses on **production deployment automation**, **high availability**, and **zero-downtime releases**—concepts commonly used in modern DevOps environments.
+The implementation focuses on real DevOps practices including **zero-downtime deployments**, **health validation**, **traffic switching**, and **instant rollback**—concepts commonly used in modern cloud infrastructure and deployment pipelines.
 
 ---
 
@@ -654,12 +720,12 @@ It focuses on **production deployment automation**, **high availability**, and *
 
 **AWS Cloud & DevOps Engineer**
 
-I build practical cloud infrastructure and CI/CD automation projects using AWS, Docker, Jenkins, Linux, and Infrastructure as Code.
+I build hands-on cloud infrastructure and CI/CD automation projects using AWS, Docker, Jenkins, Linux, GitHub Actions, and Infrastructure as Code.
 
 ### Connect With Me
 
-* **GitHub:** https://github.com/TempleStephen
-* **Upwork Portfolio:** https://tinyurl.com/6vwve75h
+- **GitHub:** https://github.com/TempleStephen
+- **Upwork Portfolio:** https://tinyurl.com/6vwve75h
 
 ---
 
