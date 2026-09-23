@@ -28,14 +28,12 @@ If anything goes wrong, traffic can be switched back instantly without rebuildin
 
 ## 🏗️ Architecture Diagram
 
+This architecture demonstrates a complete Blue-Green deployment workflow using Jenkins, Docker, Nginx, and two isolated application environments.
+
 <p align="center">
   <img src="./screenshots/architecture-diagram.png"
        alt="Blue-Green CI/CD Architecture"
        width="100%">
-</p>
-
-<p align="center">
-  <img src="./screenshots/architecture-diagram.png" alt="Blue-Green CI/CD Architecture" width="100%">
 </p>
 
 ---
