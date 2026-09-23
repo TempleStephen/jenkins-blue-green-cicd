@@ -32,7 +32,7 @@ This architecture demonstrates a complete Blue-Green deployment workflow using J
 
 <p align="center">
   <img src="./screenshots/architecture-diagram.png"
-       alt="Architecture Diagram.png"
+       alt="Architecture Diagram"
        width="100%">
 </p>
 
