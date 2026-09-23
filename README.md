@@ -32,7 +32,7 @@ This architecture demonstrates a complete Blue-Green deployment workflow using J
 
 <p align="center">
   <img src="./screenshots/architecture-diagram.png"
-       alt="Architecture Diagram"
+       alt="Architecture Diagram.png"
        width="100%">
 </p>
 
@@ -95,6 +95,46 @@ This architecture demonstrates a complete Blue-Green deployment workflow using J
 ---
 
 # 📁 Project Structure
+
+---
+
+## 📸 Project Screenshots
+
+### Jenkins Pipeline Success
+
+<p align="center">
+  <img src="./screenshots/jenkins-pipeline-success.png" width="100%" alt="Jenkins Pipeline Success"/>
+</p>
+
+### Blue Environment (Before Cutover)
+
+<p align="center">
+  <img src="./screenshots/blue-environment-ui.png" width="100%" alt="Blue Environment"/>
+</p>
+
+### Green Environment (After Deployment)
+
+<p align="center">
+  <img src="./screenshots/green-environment-ui.png" width="100%" alt="Green Environment"/>
+</p>
+
+### Traffic Successfully Switched to Green
+
+<p align="center">
+  <img src="./screenshots/traffic-switch-green.png" width="100%" alt="Traffic Switched to Green"/>
+</p>
+
+### Instant Rollback to Blue
+
+<p align="center">
+  <img src="./screenshots/rollback-to-blue.png" width="100%" alt="Rollback to Blue"/>
+</p>
+
+### Running Docker Containers
+
+<p align="center">
+  <img src="./screenshots/docker-containers-running.png" width="100%" alt="Docker Containers"/>
+</p>
 
 ```bash
 jenkins-blue-green-cicd/
