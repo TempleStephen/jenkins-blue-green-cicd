@@ -1,5 +1,13 @@
-pipeline {
+﻿pipeline {
     agent any
+
+    parameters {
+        booleanParam(
+            name: 'ROLLBACK',
+            defaultValue: false,
+            description: 'Rollback traffic to the previous environment'
+        )
+    }
 
     environment {
         NGINX_CONTAINER = "blue-green-nginx"
@@ -8,7 +16,12 @@ pipeline {
     }
 
     stages {
+
         stage('Switch Traffic') {
+            when {
+                expression { return !params.ROLLBACK }
+            }
+
             steps {
                 script {
                     echo "========== SWITCH TRAFFIC =========="
@@ -20,8 +33,10 @@ pipeline {
 
                         echo "Switching traffic to ${targetBackend}"
 
-                        sed 's|proxy_pass http://blue_backend;|proxy_pass http://${targetBackend};|g' ${NGINX_CONFIG} > /tmp/default.conf
-cat /tmp/default.conf > ${NGINX_CONFIG}
+                        sed 's|proxy_pass http://blue_backend;|proxy_pass http://${targetBackend};|g' \
+                        ${NGINX_CONFIG} > /tmp/default.conf
+
+                        cat /tmp/default.conf > ${NGINX_CONFIG}
 
                         echo "Testing Nginx configuration..."
                         docker exec ${NGINX_CONTAINER} nginx -t
@@ -30,15 +45,58 @@ cat /tmp/default.conf > ${NGINX_CONFIG}
                         docker exec ${NGINX_CONTAINER} nginx -s reload
 
                         echo "Verifying active configuration..."
-                        docker exec ${NGINX_CONTAINER} grep -q "proxy_pass http://${targetBackend};" /etc/nginx/conf.d/default.conf
+                        docker exec ${NGINX_CONTAINER} grep -q \
+                        "proxy_pass http://${targetBackend};" \
+                        /etc/nginx/conf.d/default.conf
 
                         echo "Traffic switch verified successfully."
                     """
 
                     echo "Verified: Nginx is routing traffic to ${targetBackend}"
+                }
+            }
+        }
+
+        stage('Rollback') {
+            when {
+                expression { return params.ROLLBACK }
+            }
+
+            steps {
+                script {
+                    echo "========== ROLLBACK =========="
 
                     sh """
-                        docker exec ${NGINX_CONTAINER} grep "proxy_pass" /etc/nginx/conf.d/default.conf
+                        set -e
+
+                        ACTIVE_BACKEND=\$(docker exec ${NGINX_CONTAINER} sh -c \
+                        "grep proxy_pass /etc/nginx/conf.d/default.conf")
+
+                        if echo "\$ACTIVE_BACKEND" | grep green_backend >/dev/null; then
+                            TARGET=blue_backend
+                        else
+                            TARGET=green_backend
+                        fi
+
+                        echo "Rolling traffic back to \$TARGET"
+
+                        sed "s|proxy_pass http://.*_backend;|proxy_pass http://\$TARGET;|g" \
+                        ${NGINX_CONFIG} > /tmp/default.conf
+
+                        cat /tmp/default.conf > ${NGINX_CONFIG}
+
+                        echo "Testing rollback configuration..."
+                        docker exec ${NGINX_CONTAINER} nginx -t
+
+                        echo "Reloading Nginx..."
+                        docker exec ${NGINX_CONTAINER} nginx -s reload
+
+                        echo "Verifying rollback..."
+                        docker exec ${NGINX_CONTAINER} grep -q \
+                        "proxy_pass http://\$TARGET;" \
+                        /etc/nginx/conf.d/default.conf
+
+                        echo "Rollback completed successfully."
                     """
                 }
             }
@@ -51,7 +109,14 @@ cat /tmp/default.conf > ${NGINX_CONFIG}
         }
 
         failure {
-            echo "Traffic switch failed."
+            echo "Traffic switch or rollback failed."
+        }
+
+        always {
+            sh """
+                echo "Current active backend:"
+                docker exec ${NGINX_CONTAINER} grep proxy_pass /etc/nginx/conf.d/default.conf
+            """
         }
     }
 }

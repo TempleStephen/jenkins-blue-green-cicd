@@ -1,9 +1,12 @@
 services:
-
   blue:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        APP_ENV: BLUE
+        APP_VERSION: v1.0.0
+    image: jenkins-blue-green-cicd-blue:latest
     container_name: blue-app
     ports:
       - "5001:80"
@@ -15,6 +18,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        APP_ENV: GREEN
+        APP_VERSION: v1.1.0
+    image: jenkins-blue-green-cicd-green:latest
     container_name: green-app
     ports:
       - "5002:80"

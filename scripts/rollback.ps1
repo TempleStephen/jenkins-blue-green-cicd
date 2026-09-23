@@ -1,16 +1,37 @@
-Write-Host "Rolling back traffic to BLUE..."
+Write-Host "========== ROLLBACK STARTED ==========" -ForegroundColor Yellow
 
-(Get-Content nginx\default.conf) `
-    -replace 'proxy_pass http://green_backend;', 'proxy_pass http://blue_backend;' |
-    Set-Content nginx\default.conf
+$nginxContainer = "blue-green-nginx"
 
-docker exec blue-green-nginx nginx -t
+Write-Host "Checking active backend..."
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Nginx configuration test failed."
+$active = docker exec $nginxContainer sh -c "grep proxy_pass /etc/nginx/conf.d/default.conf"
+
+if ($active -match "green_backend") {
+    $target = "blue_backend"
+    Write-Host "Green is LIVE. Rolling back to BLUE..." -ForegroundColor Cyan
+}
+elseif ($active -match "blue_backend") {
+    $target = "green_backend"
+    Write-Host "Blue is LIVE. Rolling back to GREEN..." -ForegroundColor Cyan
+}
+else {
+    Write-Host "Unable to determine active backend." -ForegroundColor Red
     exit 1
 }
 
-docker exec blue-green-nginx nginx -s reload
+docker exec $nginxContainer sh -c "
+sed -i 's|proxy_pass http://.*_backend;|proxy_pass http://$target;|g' \
+/etc/nginx/conf.d/default.conf"
 
-Write-Host "Rollback completed. BLUE is now live."
+docker exec $nginxContainer nginx -t
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Nginx configuration failed validation." -ForegroundColor Red
+    exit 1
+}
+
+docker exec $nginxContainer nginx -s reload
+
+Write-Host ""
+Write-Host "Rollback completed successfully." -ForegroundColor Green
+
+docker exec $nginxContainer grep proxy_pass /etc/nginx/conf.d/default.conf
