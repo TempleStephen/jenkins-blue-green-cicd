@@ -28,7 +28,11 @@ If anything goes wrong, traffic can be switched back instantly without rebuildin
 
 ## 🏗️ Architecture Diagram
 
-> **Add your generated architecture image here.**
+<p align="center">
+  <img src="./screenshots/architecture-diagram.png"
+       alt="Blue-Green CI/CD Architecture"
+       width="100%">
+</p>
 
 <p align="center">
   <img src="./screenshots/architecture-diagram.png" alt="Blue-Green CI/CD Architecture" width="100%">
